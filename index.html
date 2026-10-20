@@ -50,11 +50,14 @@
         
         .cmd-btn { padding: 8px 12px; background: #34495e; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .cmd-btn:hover { background: #2c3e50; }
-        .cmd-loop-btn { background: #d35400; color: #fff; display: none; }
+        .cmd-loop-btn { background: #8e44ad !important; color: #fff; } /* Mor Renkli Sonsuzluk Butonu */
         
-        .command-queue { display: flex; gap: 5px; min-height: 40px; background: #f1f2f6; padding: 8px; border-radius: 6px; border: 1px solid #dcdde1; align-items: center; flex-wrap: wrap; }
+        .command-queue-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 4px; }
+        .command-queue { display: flex; gap: 5px; min-height: 45px; background: #f1f2f6; padding: 8px; border-radius: 6px; border: 1px solid #dcdde1; align-items: center; flex-wrap: wrap; }
         .queue-item { background: #3498db; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
-        .loop-badge { background: #e67e22; border: 2px solid #d35400; }
+        .loop-badge { background: #8e44ad !important; border: 2px solid #5b2c6f; } /* Mor renkte sonsuzluk etiketi */
+
+        .btn-close-loop { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
@@ -122,12 +125,21 @@
                             <button class="cmd-btn" onclick="addCommand('Sol ⬅️')">Sol ⬅️</button>
                             <button class="cmd-btn" onclick="addCommand('Sağ ➡️')">Sağ ➡️</button>
                             <button class="cmd-btn" onclick="addCommand('Geri 🔙')">Geri 🔙</button>
-                            <button id="loopBtn" class="cmd-btn cmd-loop-btn" onclick="toggleLoopMode()">♾️ Sonsuz Tekrar: KAPALI</button>
+                            <!-- Mor Renkli Sonsuzluk Butonu -->
+                            <button id="loopBtn" class="cmd-btn cmd-loop-btn" onclick="openInfinityMode()">♾️ Sonsuzluk</button>
                             <button class="cmd-btn" onclick="clearCommands()" style="background:#e74c3c;">Temizle 🗑️</button>
                         </div>
-                        <div class="command-queue" id="commandQueue" style="margin-top:8px;">
-                            <span style="color:#95a5a6; font-size:0.85rem; font-style:italic;">Komut eklemek için yukarıdaki tuşları kullanın...</span>
+
+                        <!-- Komut Kuyruğu Üst Başlığı & Sonsuzluğu Kapat Butonu -->
+                        <div class="command-queue-header">
+                            <span style="font-size:0.85rem; font-weight:bold; color:#555;" id="cmdCountText">Komutlar (0/10):</span>
+                            <button id="closeLoopBtn" class="btn-close-loop" onclick="disableInfinityMode()">Sonsuzu Kapat ❌</button>
                         </div>
+
+                        <div class="command-queue" id="commandQueue">
+                            <span style="color:#95a5a6; font-size:0.85rem; font-style:italic;">Komut eklemek için yukarıdaki tuşları kullanın... (Maksimum 10 komut)</span>
+                        </div>
+
                         <div style="margin-top:10px;">
                             <button id="runBtn" style="padding:8px 20px; background:#2ecc71; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:1rem;">Çalıştır ▶️</button>
                         </div>
@@ -152,11 +164,17 @@
         let wheatCol = 0, wheatRow = 0;
         let obstacles = [];
         let isMoving = false;
-        let isLoopActive = false;
+        
+        let loopRepeatCount = 0; // Sonsuzluk tekrar sayısı
 
         window.addEventListener('DOMContentLoaded', function() {
             if (!localStorage.getItem('currentLvl')) {
                 localStorage.setItem('currentLvl', '0');
+            }
+
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                document.getElementById('txtStudentName').value = savedName;
             }
 
             loadLevelMap();
@@ -174,29 +192,38 @@
             if (val) {
                 localStorage.setItem('userRole', 'student');
                 localStorage.setItem('playerName', val);
-                alert("İsmin kaydedildi: " + val);
+                alert("Hesabın ve ismin kaydedildi: " + val);
                 updateInterface();
             }
         }
 
-        function toggleLoopMode() {
-            isLoopActive = !isLoopActive;
-            const btn = document.getElementById('loopBtn');
-            btn.innerText = isLoopActive ? "♾️ Sonsuz Tekrar: AÇIK" : "♾️ Sonsuz Tekrar: KAPALI";
-            btn.style.background = isLoopActive ? "#27ae60" : "#d35400";
+        /* Mor Sonsuzluk Modunu Açma ve Tekrar Sayısı Belirleme */
+        function openInfinityMode() {
+            if (isMoving) return;
+            const count = prompt("Komutların kaç kez tekrar edilmesini istiyorsun? (Örn: 3, 5, 10)");
+            const parsedCount = parseInt(count);
+
+            if (!isNaN(parsedCount) && parsedCount > 0) {
+                loopRepeatCount = parsedCount;
+                document.getElementById('closeLoopBtn').style.display = 'inline-block';
+                document.getElementById('loopBtn').innerText = `♾️ Sonsuzluk (${loopRepeatCount}x)`;
+                renderQueue();
+            } else if (count !== null) {
+                alert("Lütfen geçerli bir sayı girin!");
+            }
+        }
+
+        /* Sonsuzluğu Kapat Butonu */
+        function disableInfinityMode() {
+            loopRepeatCount = 0;
+            document.getElementById('closeLoopBtn').style.display = 'none';
+            document.getElementById('loopBtn').innerText = "♾️ Sonsuzluk";
+            renderQueue();
         }
 
         function loadLevelMap() {
             const lvl = parseInt(localStorage.getItem('currentLvl') || '0');
             obstacles = [];
-
-            const loopBtn = document.getElementById('loopBtn');
-            if (lvl >= 3) {
-                loopBtn.style.display = 'inline-block';
-            } else {
-                loopBtn.style.display = 'none';
-                isLoopActive = false;
-            }
 
             if (lvl === 0) {
                 chickCol = 1; chickRow = 3;
@@ -245,8 +272,13 @@
             chickEl.style.top = (chickRow * gridSize) + 'px';
         }
 
+        /* 10 Komut Sınırı (100%10) Kontrolü ile Komut Ekleme */
         function addCommand(cmd) {
             if (isMoving) return;
+            if (commands.length >= 10) {
+                alert("Komut kutusu doldu! En fazla 10 komut ekleyebilirsin.");
+                return;
+            }
             commands.push(cmd);
             renderQueue();
         }
@@ -259,15 +291,18 @@
 
         function renderQueue() {
             const queueEl = document.getElementById('commandQueue');
+            document.getElementById('cmdCountText').innerText = `Komutlar (${commands.length}/10):`;
+
             if (commands.length === 0) {
-                queueEl.innerHTML = '<span style="color:#95a5a6; font-size:0.85rem; font-style:italic;">Komut eklemek için yukarıdaki tuşları kullanın...</span>';
+                queueEl.innerHTML = '<span style="color:#95a5a6; font-size:0.85rem; font-style:italic;">Komut eklemek için yukarıdaki tuşları kullanın... (Maksimum 10 komut)</span>';
                 return;
             }
             queueEl.innerHTML = '';
             commands.forEach(c => {
                 const span = document.createElement('span');
+                const isLoopActive = loopRepeatCount > 0;
                 span.className = 'queue-item' + (isLoopActive ? ' loop-badge' : '');
-                span.innerText = (isLoopActive ? '♾️ ' : '') + c;
+                span.innerText = (isLoopActive ? `♾️ (${loopRepeatCount}x) ` : '') + c;
                 queueEl.appendChild(span);
             });
         }
@@ -313,7 +348,7 @@
             const pass = prompt("Öğretmen şifresini girin:");
             if (pass === "teacher§tap") {
                 localStorage.setItem('userRole', 'teacher');
-                alert("Öğretmen hesabı kaydedildi!");
+                alert("Öğretmen hesabı başarıyla kaydedildi!");
                 updateInterface();
             } else if (pass !== null) { alert("Hatalı şifre!"); }
         }
@@ -322,7 +357,7 @@
             const pass = prompt("Creative şifresini girin:");
             if (pass === "creative0987654321234567890") {
                 localStorage.setItem('userRole', 'creative');
-                alert("Creative hesabı kaydedildi!");
+                alert("Creative hesabı başarıyla kaydedildi!");
                 updateInterface();
             } else if (pass !== null) { alert("Hatalı şifre!"); }
         }
@@ -333,10 +368,12 @@
         }
 
         function fullReset() {
-            localStorage.clear();
-            localStorage.setItem('currentLvl', '0');
-            alert("Tüm hesaplar ve ilerlemeler başarıyla sıfırlandı!");
-            location.reload();
+            if (confirm("Tüm hesap bilgilerin ve geçtiğin seviyeler silinecek. Emin misin?")) {
+                localStorage.clear();
+                localStorage.setItem('currentLvl', '0');
+                alert("Tüm hesaplar ve ilerlemeler sıfırlandı!");
+                location.reload();
+            }
         }
 
         async function runGame() {
@@ -348,10 +385,13 @@
 
             isMoving = true;
             let hitObstacle = false;
-            let maxSteps = isLoopActive ? 100 : commands.length;
+            
+            // Eğer sonsuzluk modu aktifse girilen tekrar sayısı kadar; değilse 1 defa çalışır
+            let totalLoops = loopRepeatCount > 0 ? loopRepeatCount : 1;
+            let totalSteps = commands.length * totalLoops;
 
             let stepCount = 0;
-            while (stepCount < maxSteps) {
+            while (stepCount < totalSteps) {
                 let cmdIndex = stepCount % commands.length;
                 let cmd = commands[cmdIndex];
                 
@@ -383,12 +423,12 @@
                 stepCount++;
             }
 
-            // ENGELE ÇARPARSA VEYA EKSİK KOMUT VERİLİRSE BAŞLANGICA DÖNÜŞ
+            // HATA DURUMU -> SEVİYE ATLANMAZ, BAŞA DÖNÜLÜR
             if (hitObstacle || (chickCol !== wheatCol || chickRow !== wheatRow)) {
                 if (hitObstacle) {
-                    alert("💥 Oh hayır! Civciv engele çarptı. Tekrar dene!");
+                    alert("💥 Oh hayır! Civciv engele çarptı. Seviye atlanamadı, tekrar dene!");
                 } else {
-                    alert("🌾 Civciv buğdaya ulaşamadı! Komutlar yetersiz kaldı, en başa dönülüyor.");
+                    alert("🌾 Civciv buğdaya ulaşamadı! Komutlar yetersiz, seviye atlanamadı ve en başa dönülüyor.");
                 }
                 clearCommands();
                 loadLevelMap();
@@ -396,7 +436,7 @@
                 return;
             }
 
-            // BAŞARILI DURUM
+            // BAŞARILI DURUM -> SEVİYE ATLANIR
             if (chickCol === wheatCol && chickRow === wheatRow) {
                 let lvl = parseInt(localStorage.getItem('currentLvl') || '0') + 1;
 
@@ -408,7 +448,7 @@
                 localStorage.setItem('currentLvl', lvl);
                 updateInterface();
                 clearCommands();
-                alert("Tebrikler! Seviye başarıyla tamamlandı 🐥");
+                alert("Tebrikler! Seviye başarıyla tamamlandı ve kaydedildi 🐥");
                 loadLevelMap();
             }
             
