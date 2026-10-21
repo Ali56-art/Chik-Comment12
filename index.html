@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civciv Komutu</title>
+    <title>Chic Command - Bahçeşehir Bursa Modern</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background-color: #f0f4f8; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -26,9 +26,13 @@
         .name-input-box input { padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; }
         .name-input-box button { padding: 5px 10px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
+        /* Header ve Bahçeşehir Logo Alanı */
         .header { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .header-title-container { display: flex; align-items: center; gap: 12px; }
+        .school-logo { height: 42px; width: auto; background: #fff; padding: 3px 6px; border-radius: 6px; }
+
         .content-body { display: flex; flex: 1; }
-        .sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ddd; display: flex; flex-direction: column; justify-content: space-between; padding: 15px; }
+        .sidebar { width: 300px; background: #f8f9fa; border-right: 1px solid #ddd; display: flex; flex-direction: column; justify-content: space-between; padding: 15px; }
         .game-area { flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
         
         .btn-reset { width: 100%; background: #c0392b; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; padding: 10px; margin-top: 5px; }
@@ -38,9 +42,23 @@
         /* Öğrencilerim Paneli */
         .students-panel { background: #eef9f5; border: 2px solid #2ecc71; border-radius: 8px; padding: 10px; margin-top: 10px; display: none; }
         .students-panel h4 { font-size: 0.9rem; color: #27ae60; margin-bottom: 8px; }
-        .student-list { list-style: none; max-height: 120px; overflow-y: auto; margin-top: 8px; }
-        .student-item { background: #fff; border: 1px solid #2ecc71; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .student-list { list-style: none; max-height: 180px; overflow-y: auto; margin-top: 8px; }
+        .student-item { background: #fff; border: 1px solid #2ecc71; padding: 6px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 6px; position: relative; font-weight: bold; }
+        .student-row-top { display: flex; justify-content: space-between; align-items: center; }
         .online-dot { color: #27ae60; font-size: 0.75rem; }
+
+        /* Üç Nokta ve Ödev Menüsü */
+        .three-dots-btn { display: none; cursor: pointer; padding: 2px 6px; font-size: 1rem; color: #555; }
+        .student-item:hover .three-dots-btn { display: inline-block; }
+        
+        .homework-menu { display: none; background: #fff8e7; border: 1px solid #f39c12; border-radius: 6px; padding: 8px; margin-top: 6px; }
+        .subject-btn { width: 100%; text-align: left; padding: 4px 8px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .subject-btn.selected { border-left: 5px solid #f1c40f !important; background: #fffde7; }
+        .send-hw-btn { width: 100%; background: #27ae60; color: white; border: none; padding: 5px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-top: 4px; }
+
+        /* Öğrenci Tarafı Ödev Paneli & Bildirim Rozeti */
+        .student-homework-panel { background: #fff3e0; border: 2px solid #ff9800; border-radius: 8px; padding: 10px; margin-top: 10px; display: none; }
+        .homework-badge { background: #e74c3c; color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 50%; font-weight: bold; margin-left: 5px; }
 
         /* 10x8 Kare Izgaralı Oyun Alanı */
         .grid-box { 
@@ -65,7 +83,7 @@
         .command-queue-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 4px; }
         .command-queue { display: flex; gap: 5px; min-height: 45px; background: #f1f2f6; padding: 8px; border-radius: 6px; border: 1px solid #dcdde1; align-items: center; flex-wrap: wrap; }
         .queue-item { background: #3498db; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
-        .queue-item:hover { transform: scale(1.05); background: #e74c3c; } /* Tıklayıp silmek için görsel uyarı */
+        .queue-item:hover { transform: scale(1.05); background: #e74c3c; }
         .loop-badge { background: #8e44ad !important; border: 2px solid #5b2c6f; }
 
         .btn-close-loop { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; display: none; }
@@ -99,9 +117,13 @@
         </div>
 
         <div class="header">
-            <div>
-                <span>🐤 Civciv Komutu</span>
-                <h2>Hoş Geldin!</h2>
+            <div class="header-title-container">
+                <!-- Bahçeşehir Bursa Modern Logosu -->
+                <img src="https://www.bahcesehir.k12.tr/assets/img/logo.png" alt="Bahçeşehir Bursa Modern" class="school-logo">
+                <div>
+                    <span>🐤 Chic Command</span>
+                    <h2>Bahçeşehir Bursa Modern</h2>
+                </div>
             </div>
         </div>
 
@@ -129,6 +151,16 @@
                             <!-- Eklenecek Öğrenciler Listesi -->
                         </ul>
                     </div>
+
+                    <!-- Öğrenci Ödev Paneli (Sadece Öğrenci Hesabı Görür) -->
+                    <div id="studentHomeworkPanel" class="student-homework-panel">
+                        <h4 style="color:#d35400; font-size:0.9rem; display:flex; align-items:center;">
+                            📚 Ödevlerim <span id="hwNotificationBadge" class="homework-badge" style="display:none;">!1</span>
+                        </h4>
+                        <div id="studentHwContent" style="margin-top:6px; font-size:0.8rem; font-weight:bold; color:#444;">
+                            Henüz atanmış ödev yok.
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -153,7 +185,6 @@
                             <button class="cmd-btn" onclick="addCommand('Sol ⬅️')">Sol ⬅️</button>
                             <button class="cmd-btn" onclick="addCommand('Sağ ➡️')">Sağ ➡️</button>
                             <button class="cmd-btn" onclick="addCommand('Geri 🔙')">Geri 🔙</button>
-                            <!-- Mor Renkli Sonsuzluk Butonu -->
                             <button id="loopBtn" class="cmd-btn cmd-loop-btn" onclick="openInfinityMode()">♾️ Sonsuzluk</button>
                             <button class="cmd-btn" onclick="clearCommands()" style="background:#e74c3c;">Tümünü Temizle 🗑️</button>
                         </div>
@@ -193,12 +224,18 @@
         let obstacles = [];
         let isMoving = false;
         
-        let currentLoopMode = false; // Sonsuzluk modu şu an açık mı?
-        let activeRepeatCount = 0;   // Kaç kere tekrar edilecek?
+        let currentLoopMode = false;
+        let activeRepeatCount = 0;
+        let selectedSubjectMap = {}; // Her öğrenci için seçilen dersi tutar
 
         window.addEventListener('DOMContentLoaded', function() {
             if (!localStorage.getItem('currentLvl')) {
                 localStorage.setItem('currentLvl', '0');
+            }
+
+            // Varsayılan Gerçek Öğrenciler Veritabanı
+            if (!localStorage.getItem('registeredStudentsDB')) {
+                localStorage.setItem('registeredStudentsDB', JSON.stringify(["Sude Altay", "Kerem", "Ali", "Ayşe", "Mehmet", "Zeynep"]));
             }
 
             const savedName = localStorage.getItem('playerName');
@@ -209,6 +246,7 @@
             loadLevelMap();
             updateInterface();
             renderStudentsList();
+            checkStudentHomework();
 
             document.getElementById('teacherBtn').addEventListener('click', loginTeacher);
             document.getElementById('creativeBtn').addEventListener('click', loginCreative);
@@ -222,12 +260,20 @@
             if (val) {
                 localStorage.setItem('userRole', 'student');
                 localStorage.setItem('playerName', val);
+
+                // Gerçek öğrenci veritabanına ekle
+                let db = JSON.parse(localStorage.getItem('registeredStudentsDB') || '[]');
+                if (!db.includes(val)) {
+                    db.push(val);
+                    localStorage.setItem('registeredStudentsDB', JSON.stringify(db));
+                }
+
                 alert("Hesabın ve ismin kaydedildi: " + val);
                 updateInterface();
+                checkStudentHomework();
             }
         }
 
-        /* Mor Sonsuzluk Modunu Açma */
         function openInfinityMode() {
             if (isMoving) return;
             const count = prompt("Bundan sonra ekleyeceğin komutlar kaç kez tekrar edilsin? (Örn: 3, 5, 10)");
@@ -243,7 +289,6 @@
             }
         }
 
-        /* Sonsuzluğu Kapat Butonu (Mevcut eklenenleri silmez, sonrakileri normal ekler) */
         function disableInfinityMode() {
             currentLoopMode = false;
             activeRepeatCount = 0;
@@ -302,7 +347,6 @@
             chickEl.style.top = (chickRow * gridSize) + 'px';
         }
 
-        /* 10 Komut Sınırı (100%10) ve Obje Yapısında Komut Ekleme */
         function addCommand(cmdText) {
             if (isMoving) return;
             if (commands.length >= 10) {
@@ -310,7 +354,6 @@
                 return;
             }
 
-            // Komut nesnesi ekleme (Sonsuzluk açıksa tekrar sayısı ile kaydeder)
             commands.push({
                 text: cmdText,
                 isLoop: currentLoopMode,
@@ -320,7 +363,6 @@
             renderQueue();
         }
 
-        /* Üstten Tıklayarak Komut Silme */
         function removeCommand(index) {
             if (isMoving) return;
             commands.splice(index, 1);
@@ -364,6 +406,7 @@
             const nameDisplay = document.getElementById('displayName');
             const studentInputBox = document.getElementById('studentNameBox');
             const studentsPanel = document.getElementById('studentsPanel');
+            const studentHwPanel = document.getElementById('studentHomeworkPanel');
             const ownershipBar = document.getElementById('teacherOwnershipBar');
             const txtOwnership = document.getElementById('txtTeacherOwnership');
 
@@ -374,6 +417,7 @@
                 studentInputBox.style.display = 'none';
                 roleLbl.innerText = 'Hesap: Öğretmen';
                 studentsPanel.style.display = 'block';
+                studentHwPanel.style.display = 'none';
                 ownershipBar.style.display = 'none';
 
             } else if (role === 'creative') {
@@ -383,6 +427,7 @@
                 studentInputBox.style.display = 'none';
                 roleLbl.innerText = 'Hesap: Creative';
                 studentsPanel.style.display = 'block';
+                studentHwPanel.style.display = 'none';
                 ownershipBar.style.display = 'none';
 
             } else if (role === 'student') {
@@ -390,6 +435,7 @@
                 studentInputBox.style.display = 'flex';
                 roleLbl.innerText = 'Hesap: Öğrenci (' + (name || 'İsimsiz') + ')';
                 studentsPanel.style.display = 'none';
+                studentHwPanel.style.display = 'block';
 
                 if (ownerTeacher) {
                     txtOwnership.innerText = `${ownerTeacher}'ın öğrencisisiniz.`;
@@ -403,11 +449,12 @@
                 studentInputBox.style.display = 'flex';
                 roleLbl.innerText = 'Oyun Modu: Tekil (Solo)';
                 studentsPanel.style.display = 'none';
+                studentHwPanel.style.display = 'none';
                 ownershipBar.style.display = 'none';
             }
         }
 
-        /* Öğretmen Tarafından Öğrenci Ekleme Fonksiyonu */
+        /* GERÇEK ÖĞRENCİ KONTROLÜ İLE ÖĞRENCİ EKLEME */
         function addStudentByTeacher() {
             const role = localStorage.getItem('userRole');
             if (role !== 'teacher' && role !== 'creative') return;
@@ -420,9 +467,12 @@
                 return;
             }
 
-            // Öğretmen veya Creative hesabı eklenebilir mi kontrolü
-            if (studentName.toLowerCase().includes('teacher') || studentName.toLowerCase().includes('creative')) {
-                alert("Öğretmen veya Creative hesabı öğrenci olarak eklenemez!");
+            // Gerçek Kayıtlı Öğrenci Listesi Kontrolü
+            let registeredDB = JSON.parse(localStorage.getItem('registeredStudentsDB') || '[]');
+            const studentExists = registeredDB.some(s => s.toLowerCase() === studentName.toLowerCase());
+
+            if (!studentExists) {
+                alert(`❌ "${studentName}" adında kayıtlı bir öğrenci bulunamadı! Lütfen öğrencinin önce sisteme giriş yapıp kaydolduğundan emin olun.`);
                 return;
             }
 
@@ -431,13 +481,12 @@
                 students.push(studentName);
                 localStorage.setItem('myStudentsList', JSON.stringify(students));
                 
-                // Öğrencinin öğretmenini kaydet
                 const teacherName = localStorage.getItem('playerName') || "Öğretmeniniz";
                 localStorage.setItem('teacherOwnerName', teacherName);
 
                 input.value = '';
                 renderStudentsList();
-                alert(`${studentName} başarıyla öğrencilerinize eklendi!`);
+                alert(`🟢 "${studentName}" adlı öğrenci başarıyla online olarak eklendi!`);
             } else {
                 alert("Bu öğrenci zaten ekli!");
             }
@@ -453,12 +502,103 @@
                 return;
             }
 
-            students.forEach(s => {
+            students.forEach((s, idx) => {
                 const li = document.createElement('li');
                 li.className = 'student-item';
-                li.innerHTML = `<span>👤 ${s}</span> <span class="online-dot">🟢 Online</span>`;
+                
+                li.innerHTML = `
+                    <div class="student-row-top">
+                        <span>👤 ${s} <span class="online-dot">🟢 Online</span></span>
+                        <span class="three-dots-btn" onclick="toggleHomeworkMenu(${idx})">⋮</span>
+                    </div>
+                    <div id="hwMenu_${idx}" class="homework-menu">
+                        <div style="font-size:0.75rem; font-weight:bold; margin-bottom:4px; color:#d35400;">Ödev Dersi Seçin:</div>
+                        <button class="subject-btn" id="sub_mat_${idx}" onclick="selectSubject(${idx}, 'Matematik')">📐 Matematik</button>
+                        <button class="subject-btn" id="sub_kod_${idx}" onclick="selectSubject(${idx}, 'Kodlama')">💻 Kodlama</button>
+                        <button class="subject-btn" id="sub_ing_${idx}" onclick="selectSubject(${idx}, 'İngilizce')">🇬🇧 İngilizce</button>
+                        <button class="send-hw-btn" onclick="sendHomeworkToStudent('${s}', ${idx})">Ödevi Gönder 📩</button>
+                    </div>
+                `;
                 list.appendChild(li);
             });
+        }
+
+        function toggleHomeworkMenu(idx) {
+            const menu = document.getElementById(`hwMenu_${idx}`);
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        /* Yanında Sarı Çizgi Çıkararak Ders Seçimi */
+        function selectSubject(idx, subject) {
+            selectedSubjectMap[idx] = subject;
+            
+            document.getElementById(`sub_mat_${idx}`).classList.remove('selected');
+            document.getElementById(`sub_kod_${idx}`).classList.remove('selected');
+            document.getElementById(`sub_ing_${idx}`).classList.remove('selected');
+
+            if (subject === 'Matematik') document.getElementById(`sub_mat_${idx}`).classList.add('selected');
+            if (subject === 'Kodlama') document.getElementById(`sub_kod_${idx}`).classList.add('selected');
+            if (subject === 'İngilizce') document.getElementById(`sub_ing_${idx}`).classList.add('selected');
+        }
+
+        /* Ödevi Öğrenciye Gönderme */
+        function sendHomeworkToStudent(studentName, idx) {
+            const subject = selectedSubjectMap[idx];
+            if (!subject) {
+                alert("Lütfen önce bir ders seçin!");
+                return;
+            }
+
+            let allHw = JSON.parse(localStorage.getItem('studentHomeworksData') || '{}');
+            allHw[studentName] = {
+                subject: subject,
+                assignedBy: localStorage.getItem('playerName') || 'Öğretmen',
+                isNew: true
+            };
+
+            localStorage.setItem('studentHomeworksData', JSON.stringify(allHw));
+            alert(`📩 ${studentName} isimli öğrenciye "${subject}" ödevi başarıyla gönderildi!`);
+            toggleHomeworkMenu(idx);
+        }
+
+        /* Öğrenci Tarafında Ödevi ve Kırmızı Ünlem Rozetini Kontrol Etme */
+        function checkStudentHomework() {
+            const role = localStorage.getItem('userRole');
+            const studentName = localStorage.getItem('playerName');
+
+            if (role === 'student' && studentName) {
+                let allHw = JSON.parse(localStorage.getItem('studentHomeworksData') || '{}');
+                const myHw = allHw[studentName];
+
+                const badge = document.getElementById('hwNotificationBadge');
+                const content = document.getElementById('studentHwContent');
+
+                if (myHw) {
+                    if (myHw.isNew) {
+                        badge.style.display = 'inline-block'; // Kırmızı !1 bildirimi
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    content.innerHTML = `
+                        <div style="background:#fff; padding:6px; border-radius:4px; border-left:4px solid #27ae60;">
+                            <strong>Ders:</strong> ${myHw.subject}<br>
+                            <strong>Öğretmen:</strong> ${myHw.assignedBy}<br>
+                            <button onclick="readHomework('${studentName}')" style="margin-top:5px; background:#e67e22; color:#fff; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:0.75rem;">Tamamlandı Olarak İşaretle</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function readHomework(studentName) {
+            let allHw = JSON.parse(localStorage.getItem('studentHomeworksData') || '{}');
+            if (allHw[studentName]) {
+                allHw[studentName].isNew = false;
+                localStorage.setItem('studentHomeworksData', JSON.stringify(allHw));
+                checkStudentHomework();
+                alert("Ödev görüntülendi!");
+            }
         }
 
         function loginTeacher() {
@@ -509,7 +649,6 @@
             isMoving = true;
             let hitObstacle = false;
 
-            // Her komutu kendi tekrar sayısı kadar çalıştıran döngü yapısı
             for (let i = 0; i < commands.length; i++) {
                 let cmdObj = commands[i];
                 let repeats = cmdObj.repeat;
@@ -525,7 +664,6 @@
                     if (cmd.includes('Sağ')) nextCol = Math.min(9, chickCol + 1);
                     if (cmd.includes('Geri')) nextRow = Math.min(7, chickRow + 1);
 
-                    // Engel Kontrolü
                     let isObs = obstacles.some(o => o.col === nextCol && o.row === nextRow);
                     if (isObs) {
                         hitObstacle = true;
@@ -547,7 +685,6 @@
                 }
             }
 
-            // HATA DURUMU -> SEVİYE ATLANMAZ, BAŞA DÖNÜLÜR
             if (hitObstacle || (chickCol !== wheatCol || chickRow !== wheatRow)) {
                 if (hitObstacle) {
                     alert("💥 Oh hayır! Civciv engele çarptı. Seviye atlanamadı, tekrar dene!");
@@ -560,7 +697,6 @@
                 return;
             }
 
-            // BAŞARILI DURUM -> SEVİYE ATLANIR
             if (chickCol === wheatCol && chickRow === wheatRow) {
                 let lvl = parseInt(localStorage.getItem('currentLvl') || '0') + 1;
 
